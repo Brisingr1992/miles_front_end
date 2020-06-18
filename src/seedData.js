@@ -15,4 +15,11 @@ const initialCategories = {
     cat6: { id: 6, rewards: generateItems(5, (i) => ({ id: '6' + i, data: '' }))}
 }
 
-export default initialCategories;
+const myHistory = {
+    curr: 0,
+    undo: null,
+    redo: null,
+    stack: [initialCategories]
+}
+
+export default myHistory;

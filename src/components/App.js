@@ -3,29 +3,23 @@ import { Button, Row, Col, Divider } from 'antd';
 import CustomRow from './CustomRow';
 import Copy from './Copy';
 import '../assets/App.css';
+import {connect} from "react-redux";
+import { undoHistory, redoHistory, save} from "../actions/index";
+
 
 import { UndoOutlined, RedoOutlined, SaveOutlined } from '@ant-design/icons';
 
 class App extends React.Component {
-    constructor(props) {
-        super(props);
-        // this.renderCustomRow = this.renderCustomRow.bind(this);
+    handleUndo = (e) => {
+        this.props.dispatch(undoHistory());
     }
 
-    // renderCustomRow() {
-    //     return Data.rewards.map((reward, index) => {
-    //         return (
-    //             <CustomRow  key={reward.id}
-    //                         reward={reward}
-    //                         categories={Data.categories}
-    //             />
-    //         );
-    //     });
-    // }
+    handleRedo = (e) => {
+        this.props.dispatch(redoHistory());
+    }
 
     handleSave = (e) => {
-        e.preventDefault();
-        console.log(e);
+        this.props.dispatch(save());
     }
 
     render() {
@@ -40,7 +34,8 @@ class App extends React.Component {
                     <Button
                         type="primary"
                         icon={<UndoOutlined />}
-                        onClick={(e) => this.handleSave(e)}
+                        disabled={!this.props.myHistory.curr}
+                        onClick={(e) => this.handleUndo(e)}
                         >
                     </Button>
                     <Button
@@ -53,7 +48,8 @@ class App extends React.Component {
                     <Button
                         type="primary"
                         icon={<RedoOutlined />}
-                        onClick={(e) => this.handleSave(e)}
+                        disabled={this.props.myHistory.curr >= this.props.myHistory.stack.length - 1}
+                        onClick={(e) => this.handleRedo(e)}
                         >
                     </Button>
                 </div>
@@ -62,4 +58,10 @@ class App extends React.Component {
     }
 }
 
-export default App;
+const mapStateToProps = state => {
+    return {
+        myHistory: state.categoriesReducer
+    }
+};
+
+export default connect(mapStateToProps)(App);

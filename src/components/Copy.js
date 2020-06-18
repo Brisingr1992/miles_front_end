@@ -2,7 +2,8 @@ import React, { Component } from 'react';
 import { Container, Draggable } from 'react-smooth-dnd';
 // import Data from '../seedData.json';
 import {connect} from "react-redux";
-import {addCategory, deleteCategory} from "../actions/index";
+import { addCategory, deleteCategory, undoHistory, redoHistory} from "../actions/index";
+import { CloseCircleOutlined } from '@ant-design/icons';
 
 const groupStyle = {
   marginLeft: '50px',
@@ -10,26 +11,6 @@ const groupStyle = {
 }
 
 class Copy extends Component {
-  constructor(props) {
-    super(props);
-
-    // this.state = {
-    //   cat1: this.generateItems(5, (i) => ({ id: '1' + i, data: `R${i}` })),
-    //   cat2: this.generateItems(5, (i) => ({ id: '2' + i, data: '' })),
-    //   cat3: this.generateItems(5, (i) => ({ id: '3' + i, data: `` })),
-    //   cat4: this.generateItems(5, (i) => ({ id: '4' + i, data: `` })),
-    //   cat5: this.generateItems(5, (i) => ({ id: '5' + i, data: `` })),
-    // }
-  }
-
-    // generateItems = (count, creator) => {
-    //     const result = [];
-    //     for (let i = 0; i < count; i++) {
-    //         result.push(creator(i));
-    //     }
-    //     return result;
-    // };
-
     applyDrag = (arr, elem, dragResult) => {
         const { removedIndex, addedIndex, payload } = dragResult;
         if (removedIndex === null && addedIndex === null) return arr;
@@ -38,7 +19,7 @@ class Copy extends Component {
         let itemToAdd = payload;
 
         if (removedIndex !== null) {
-            this.props.handleRewardDelete(elem, removedIndex, itemToAdd);
+            this.props.handleRewardDelete(elem, removedIndex);
             // result = arr.map((elem, index) => index == addedIndex - 1 ? itemToAdd : elem);
         }
 
@@ -51,12 +32,18 @@ class Copy extends Component {
     };
 
     shouldAnimateDrop = (sourceContainerOptions, payload) => false;
+    handleClose = (categories, idx, e) => {
+        e.preventDefault();
+        this.props.handleRewardDelete(categories, idx);
+    }
 
   render() {
-    const {categories} = this.props;
-    console.log(categories);
+    const _that = this;
+    let hist = this.props.myHistory;
+    let curr = hist.curr;
 
-    // if (!categories.ca1) return null;
+    const categories = hist.stack[curr]
+    
     return (
       <div style={{ display: 'flex', justifyContent: 'stretch', marginTop: '50px', marginRight: '50px' }}>
         <div style={groupStyle}>
@@ -83,6 +70,7 @@ class Copy extends Component {
                   <Draggable key={i}>
                     <div className="draggable-item">
                       {p.data}
+                      {p.data ? <CloseCircleOutlined onClick={_that.handleClose.bind(_that, 'cat2', i)}/> : null}
                     </div>
                   </Draggable>
                 );
@@ -93,11 +81,12 @@ class Copy extends Component {
         <div style={groupStyle}>
           <Container lockAxis="x" groupName="1" autoScrollEnabled={false} shouldAnimateDrop={this.shouldAnimateDrop} getChildPayload={i => categories.cat3.rewards[i]} onDrop={e => this.applyDrag(categories.cat3.rewards,'cat3', e)}>
             {
-              categories.cat3 && categories.cat3.rewards.map(p => {
+              categories.cat3 && categories.cat3.rewards.map((p, i) => {
                 return (
                   <Draggable key={p.id}>
                     <div className="draggable-item">
                       {p.data}
+                      {p.data ? <CloseCircleOutlined onClick={_that.handleClose.bind(_that, 'cat3', i)}/> : null}
                     </div>
                   </Draggable>
                 );
@@ -108,11 +97,12 @@ class Copy extends Component {
         <div style={groupStyle}>
           <Container lockAxis="x" groupName="1" autoScrollEnabled={false} shouldAnimateDrop={this.shouldAnimateDrop} getChildPayload={i => categories.cat4.rewards[i]} onDrop={e => this.applyDrag(categories.cat4.rewards, 'cat4', e)}>
             {
-              categories.cat4 && categories.cat4.rewards.map(p => {
+              categories.cat4 && categories.cat4.rewards.map((p, i) => {
                 return (
                   <Draggable key={p.id}>
                     <div className="draggable-item">
                       {p.data}
+                      {p.data ? <CloseCircleOutlined onClick={_that.handleClose.bind(_that, 'cat4', i)}/> : null}
                     </div>
                   </Draggable>
                 );
@@ -123,11 +113,12 @@ class Copy extends Component {
         <div style={groupStyle}>
           <Container lockAxis="x" groupName="1" autoScrollEnabled={false} shouldAnimateDrop={this.shouldAnimateDrop} getChildPayload={i => categories.cat5.rewards[i]} onDrop={e => this.applyDrag(categories.cat5.rewards, 'cat5', e)}>
             {
-              categories.cat5 && categories.cat5.rewards.map(p => {
+              categories.cat5 && categories.cat5.rewards.map((p, i) => {
                 return (
                   <Draggable key={p.id}>
                     <div className="draggable-item">
                       {p.data}
+                      {p.data ? <CloseCircleOutlined onClick={_that.handleClose.bind(_that, 'cat5', i)}/> : null}
                     </div>
                   </Draggable>
                 );
@@ -146,7 +137,7 @@ Copy.propTypes = {
 
 const mapStateToProps = state => {
     return {
-      categories: state.categoriesReducer
+        myHistory: state.categoriesReducer
     }
 };
 const mapDispatchToProps = dispatch => {
@@ -154,8 +145,8 @@ const mapDispatchToProps = dispatch => {
       handleRewardSubmit: (cat, idx, item) => {
         dispatch(addCategory(cat, idx, item));
       },
-      handleRewardDelete: (cat, idx, item) => {
-        dispatch(deleteCategory(cat, idx, item));
+      handleRewardDelete: (cat, idx) => {
+        dispatch(deleteCategory(cat, idx));
       }
     }
 };
