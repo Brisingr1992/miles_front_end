@@ -23,7 +23,7 @@ const categoriesReducer = (state = myHistory, action) => {
       case 'ADD_REWARD': {
         let { categories, idx, item } = action.payload;
         let newData = _.cloneDeep(currCategories);
-        let result = newData[categories].rewards.map((elem, index) => index == idx - 1 ? item : elem);
+        let result = newData[categories].rewards.map((elem, index) => index === idx - 1 ? item : elem);
         newData[categories].rewards = result;
   
         return {
@@ -32,12 +32,11 @@ const categoriesReducer = (state = myHistory, action) => {
             curr:curr+1
         };
       }
-      break;
   
       case 'DELETE_REWARD': {
         let { categories, idx } = action.payload;
         let newData = _.cloneDeep(currCategories);
-        let result = currCategories[categories].rewards.map((elem, index) => index == idx ? { id: index, data: ''} : elem);
+        let result = newData[categories].rewards.map((elem, index) => index == idx ? { id: index, data: ''} : elem);
         newData[categories].rewards = result;
         return {
             ...state,
@@ -45,7 +44,6 @@ const categoriesReducer = (state = myHistory, action) => {
             curr:curr+1
         };
       }
-        break;
       
       case 'UNDO':
         return {...state, curr: curr - 1 }
